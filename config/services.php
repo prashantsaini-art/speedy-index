@@ -2,17 +2,14 @@
 
 return [
 
-    /*
-    |--------------------------------------------------------------------------
-    | Third Party Services
-    |--------------------------------------------------------------------------
-    |
-    | This file is for storing the credentials for third party services such
-    | as Mailgun, Postmark, AWS and more. This file provides the de facto
-    | location for this type of information, allowing packages to have
-    | a conventional file to locate the various service credentials.
-    |
-    */
+    'speedyindex' => [
+'api_key' => env('SPEEDYINDEX_API_KEY'),
+'base_url' => env('SPEEDYINDEX_BASE_URL', 'https://api.speedyindex.com/v2'),
+'timeout' => env('SPEEDYINDEX_TIMEOUT', 30),
+'retry_times' => env('SPEEDYINDEX_RETRY_TIMES', 3),
+'retry_delay' => env('SPEEDYINDEX_RETRY_DELAY', 1000),
+],
+
 
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),

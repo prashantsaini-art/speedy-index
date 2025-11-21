@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Currency Rates</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 500px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .currency-select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .rate-list {
+            list-style-type: none;
+            padding: 0;
+            max-height: 300px;
+            overflow-y: auto;
+            border-top: 1px solid #eee;
+        }
+        .rate-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+        .rate-list li span:first-child {
+            font-weight: bold;
+        }
+        #loading {
+            text-align: center;
+            display: none; /* Hidden by default */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Currency Exchange Rates</h1>
+        
+        <label for="baseCurrency">Select Base Currency:</label>
+        <select id="baseCurrency" class="currency-select"></select>
+
+        <p id="loading">Loading rates...</p>
+        <ul class="rate-list" id="rateList">
+            <!-- Currency rates will be dynamically added here -->
+        </ul>
+    </div>
+
+    <script>
+        // The API endpoint provided by the user
+        const API_URL = 'https://open.er-api.com/v6/latest/';
+
+        const baseCurrencySelect = document.getElementById('baseCurrency');
+        const rateList = document.getElementById('rateList');
+        const loadingIndicator = document.getElementById('loading');
+
+        // Function to fetch and display currency rates
+        async function fetchCurrencyRates(base = 'USD') {
+            loadingIndicator.style.display = 'block';
+            rateList.innerHTML = ''; // Clear previous list
+
+            try {
+                const response = await fetch(`${API_URL}${base}`);
+                const data = await response.json();
+
+                if (data.result === 'success') {
+                    const rates = data.rates;
+                    
+                    // Populate the select dropdown if it's empty
+                    if (baseCurrencySelect.options.length === 0) {
+                        Object.keys(rates).forEach(currencyCode => {
+                            const option = document.createElement('option');
+                            option.value = currencyCode;
+                            option.textContent = currencyCode;
+                            baseCurrencySelect.appendChild(option);
+                        });
+                        // Set the default selection
+                        baseCurrencySelect.value = base;
+                    }
+
+                    // Display the rates
+                    for (const currency in rates) {
+                        const li = document.createElement('li');
+                        li.innerHTML = `<span>${currency}</span> <span>${rates[currency].toFixed(4)}</span>`;
+                        rateList.appendChild(li);
+                    }
+
+                } else {
+                    rateList.innerHTML = `<li>Error: Could not fetch rates. ${data['error-type']}</li>`;
+                }
+            } catch (error) {
+                console.error("Fetching error:", error);
+                rateList.innerHTML = `<li>Error: Network issue or API problem.</li>`;
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+        }
+
+        // Event listener for when the user changes the base currency
+        baseCurrencySelect.addEventListener('change', (event) => {
+            fetchCurrencyRates(event.target.value);
+        });
+
+        // Initial call to load rates when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchCurrencyRates(); // Default to USD
+        });
+
+    </script>
+</body>
+</html>
